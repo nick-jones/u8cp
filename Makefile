@@ -7,4 +7,4 @@ test: codepoint.s codepoint_test.c
 	gcc $^ -lcheck -o $@
 
 run-test: test
-	./test
+	./$^
