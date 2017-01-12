@@ -6,6 +6,6 @@ int main() {
     unsigned long codepoint = utf8_to_codepoint(input);
     char character[5];
     int result = codepoint_to_utf8(codepoint, character);
-    printf("%s ~ %d -- U+%lX\n", character, result, codepoint); // ☃ -- U+2603
+    printf("%s -- U+%lX\n", character, codepoint); // ☃ -- U+2603
     return 0;
 }
