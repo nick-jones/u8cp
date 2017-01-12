@@ -15,14 +15,14 @@ _utf8_to_codepoint:
   movzx edx, byte ptr [rdi+1] /* next char */
   xor edx, 0x80               /* remove the continuation prefix */
   sal edx, 12                 /* << 12 */
-  add eax, edx                /* add to codepoint */
+  or eax, edx                 /* add to codepoint */
   movzx edx, byte ptr [rdi+2] /* next char */
   xor edx, 0x80               /* remove the continuation prefix */
   sal edx, 6                  /* << 6 */
-  add eax, edx                /* add to codepoint */
+  or eax, edx                 /* add to codepoint */
   movzx edx, byte ptr [rdi+3] /* next char */
   xor edx, 0x80               /* remove the continuation prefix */
-  add eax, edx                /* add to codepoint */
+  or eax, edx                 /* add to codepoint */
   ret
 cb3:
   and al, 0xE0                /* 111xxxxx indicating 3 bytes */
@@ -34,10 +34,10 @@ cb3:
   movzx edx, byte ptr [rdi+1] /* next char */
   xor edx, 0x80               /* remove the continuation prefix */
   sal edx, 6                  /* << 6 */
-  add eax, edx                /* add to codepoint */
+  or eax, edx                 /* add to codepoint */
   movzx edx, byte ptr [rdi+2] /* next char */
   xor edx, 0x80               /* remove the continuation prefix */
-  add eax, edx                /* add to codepoint */
+  or eax, edx                 /* add to codepoint */
   ret
 cb2:
   and al, 0xC0                /* 11xxxxxx indicating 2 bytes */
@@ -48,7 +48,7 @@ cb2:
   sal eax, 6                  /* << 6 */
   movzx edx, byte ptr [rdi+1] /* next char */
   xor edx, 0x80               /* remove the continuation prefix */
-  add eax, edx                /* add to codepoint */
+  or eax, edx                 /* add to codepoint */
   ret
 cb1:
   movzx eax, dl               /* otherwise we're just a single byte, nothing to remove */
