@@ -2,6 +2,8 @@
 .text
 .globl _utf8_to_codepoint
 .globl _codepoint_to_utf8
+.globl _utf16be_to_codepoint
+.globl _utf16le_to_codepoint
 
 _utf8_to_codepoint:
   mov dl, [rdi]               /* rdi contains argument #1 (pointer to char, 8 bits required after dereference) */
@@ -127,4 +129,36 @@ ub4:
   ret
 err:
   mov eax, 1                  /* return failure */
+  ret
+
+_utf16be_to_codepoint:
+  movzx eax, word ptr [rdi]   /* move first word into eax */
+  xchg al, ah                 /* big endian to little endian */
+  cmp eax, 0xD800             /* U+D800 is the start of surrogate range */
+  jb done_be                  /* if the value is less, then it's not a surrogate pair */
+  cmp eax, 0xDBFF             /* 0xDBFF is the end of the surrogate range */
+  ja done_be                  /* if the value is more, then it's not a surrogate pair */
+  sub eax, 0xD800             /* remove 0xD800 as this is the first of the pair */
+  sal eax, 10                 /* << 10 */
+  movzx edx, word ptr [rdi+2] /* move the second word into edx */
+  xchg dl, dh                 /* big endian to little endian */
+  sub edx, 0xDC00             /* remove 0xDC00 as this is the second of the pair */
+  or eax, edx                 /* combine the 2 pairs into a single value */
+  add eax, 0x10000
+done_be:
+  ret
+
+_utf16le_to_codepoint:
+  movzx eax, word ptr [rdi]   /* move first word into eax */
+  cmp eax, 0xD800             /* U+D800 is the start of surrogate range */
+  jb done_le                  /* if the value is less, then it's not a surrogate pair */
+  cmp eax, 0xDBFF             /* 0xDBFF is the end of the surrogate range */
+  ja done_le                  /* if the value is more, then it's not a surrogate pair */
+  sub eax, 0xD800             /* remove 0xD800 as this is the first of the pair */
+  sal eax, 10                 /* << 10 */
+  movzx edx, word ptr [rdi+2] /* move the second word into edx */
+  sub edx, 0xDC00             /* remove 0xDC00 as this is the second of the pair */
+  or eax, edx                 /* combine the 2 pairs into a single value */
+  add eax, 0x10000
+done_le:
   ret
